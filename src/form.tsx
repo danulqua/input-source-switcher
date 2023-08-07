@@ -1,15 +1,38 @@
-import { Action, ActionPanel, Clipboard, Form, showHUD } from "@raycast/api";
-import { useState } from "react";
+import {
+  Action,
+  ActionPanel,
+  Application,
+  Clipboard,
+  Form,
+  Icon,
+  Image,
+  getFrontmostApplication,
+  showHUD,
+} from "@raycast/api";
+import { useEffect, useState } from "react";
 import { transformText } from "./utils/transformText";
 import { Language } from "./data";
 
 export default function main() {
+  const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
   const [text, setText] = useState<string>("");
   const [langFrom, setLangFrom] = useState<Language>("eng");
   const [langTo, setLangTo] = useState<Language>("ukr");
 
   const [textError, setTextError] = useState<string | undefined>("");
   const [langError, setLangError] = useState<string | undefined>("");
+
+  useEffect(() => {
+    async function getFrontmostApp() {
+      const app = await getFrontmostApplication();
+      setFrontmostApp(app);
+    }
+
+    getFrontmostApp();
+  }, []);
+
+  const pasteToAppTitle = `Paste to ${frontmostApp ? frontmostApp.name : 'Active App'}`;
+  const pasteToAppIcon: Image.ImageLike = frontmostApp ? { fileIcon: frontmostApp.path } : Icon.ArrowUp;
 
   async function handlePaste(text: string) {
     if (text.length === 0) {
@@ -31,6 +54,13 @@ export default function main() {
     const transformedText = transformText({ input: text, langFrom, langTo });
     await Clipboard.copy(transformedText);
     await showHUD("Transformed text copied to clipboard");
+  }
+
+  function handleSwitchLanguages() {
+    const [langFromCopy, langToCopy] = [langTo, langFrom];
+
+    setLangFrom(langFromCopy);
+    setLangTo(langToCopy);
   }
 
   function onChangeText(text: string) {
@@ -64,12 +94,27 @@ export default function main() {
     <Form
       actions={
         <ActionPanel>
-          <Action.SubmitForm title="Paste to Active App" onSubmit={() => handlePaste(text)} />
-          <Action.SubmitForm
-            title="Copy to Clipboard"
-            shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
-            onSubmit={() => handleCopy(text)}
-          />
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              title={pasteToAppTitle}
+              icon={pasteToAppIcon}
+              onSubmit={() => handlePaste(text)}
+            />
+            <Action.SubmitForm
+              title="Copy to Clipboard"
+              icon={Icon.CopyClipboard}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "enter" }}
+              onSubmit={() => handleCopy(text)}
+            />
+          </ActionPanel.Section>
+          <ActionPanel.Section>
+            <Action.SubmitForm
+              title="Switch Languages"
+              icon={Icon.Switch}
+              shortcut={{ modifiers: ["cmd", "shift"], key: "s" }}
+              onSubmit={handleSwitchLanguages}
+            />
+          </ActionPanel.Section>
         </ActionPanel>
       }
     >
