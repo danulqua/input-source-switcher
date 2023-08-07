@@ -1,18 +1,17 @@
 import {
   Action,
   ActionPanel,
-  Application,
   Clipboard,
   Form,
   Icon,
   Image,
-  getFrontmostApplication,
   showHUD,
 } from "@raycast/api";
 import { FormValidation, useForm } from "@raycast/utils";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { transformText } from "./utils/transformText";
 import { Language } from "./data";
+import { useFrontmostApp } from "./hooks/useFrontmostApp";
 
 interface FormValues {
   text: string;
@@ -80,17 +79,8 @@ export default function main() {
     }
   }
 
-  const [frontmostApp, setFrontmostApp] = useState<Application | null>(null);
+  const frontmostApp = useFrontmostApp();
   const action = useRef("");
-
-  useEffect(() => {
-    async function getFrontmostApp() {
-      const app = await getFrontmostApplication();
-      setFrontmostApp(app);
-    }
-
-    getFrontmostApp();
-  }, []);
 
   const pasteToAppTitle = `Paste to ${frontmostApp ? frontmostApp.name : "Active App"}`;
   const pasteToAppIcon: Image.ImageLike = frontmostApp ? { fileIcon: frontmostApp.path } : Icon.ArrowUp;
