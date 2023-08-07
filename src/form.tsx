@@ -10,7 +10,7 @@ import {
 import { FormValidation, useForm } from "@raycast/utils";
 import { useRef } from "react";
 import { transformText } from "./utils/transformText";
-import { Language } from "./data";
+import { Language, languages } from "./data";
 import { useFrontmostApp } from "./hooks/useFrontmostApp";
 
 interface FormValues {
@@ -136,8 +136,11 @@ export default function main() {
         }}
         {...langFromProps}
       >
-        <Form.Dropdown.Item value="eng" title="🇬🇧 English" />
-        <Form.Dropdown.Item value="ukr" title="🇺🇦 Ukrainian" />
+        {
+          Object.entries(languages).map(([key, value]) => (
+            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+          ))
+        }
       </Form.Dropdown>
 
       <Form.Dropdown
@@ -148,8 +151,11 @@ export default function main() {
         }}
         {...langToProps}
       >
-        <Form.Dropdown.Item value="ukr" title="🇺🇦 Ukrainian" />
-        <Form.Dropdown.Item value="eng" title="🇬🇧 English" />
+        {
+          Object.entries(languages).map(([key, value]) => (
+            <Form.Dropdown.Item key={key} value={value.id} title={value.label} />
+          ))
+        }
       </Form.Dropdown>
     </Form>
   );
